@@ -22,11 +22,18 @@
         markers: []
       }
     },
+    watch: {
+      markers() {
+        this.center = this.markers[2]
+      }
+    },
     created() {
-      axios.get('/user?ID=12345')
+      axios.get('https://whispering-basin-20961.herokuapp.com/api/')
           .then((response) => {
-            console.log(response);
-            this.markers = response.data.points.map(p => L.latLng(p.lat, p.lng))
+            this.markers = response.data.map(p => L.latLng(p.lat, p.lan, {
+              title: p.plate_number + ' ' + p.car_model,
+              alt: 'none',
+            }))
           })
           .catch(function (error) {
             console.log(error);
