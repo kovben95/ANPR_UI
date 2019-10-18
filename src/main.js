@@ -1,10 +1,12 @@
 import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
-import {LMap, LTileLayer, LMarker} from 'vue2-leaflet'
+import {LMap, LTileLayer, LMarker, LPolyline} from 'vue2-leaflet'
 import { Icon } from 'leaflet'
 import 'leaflet/dist/leaflet.css'
-
+import Buefy from 'buefy'
+import 'buefy/dist/buefy.css'
+import 'leaflet.heat/dist/leaflet-heat.js'
 
 delete Icon.Default.prototype._getIconUrl;
 Icon.Default.mergeOptions({
@@ -17,6 +19,11 @@ Icon.Default.mergeOptions({
 Vue.component('l-map', LMap)
 Vue.component('l-tile-layer', LTileLayer)
 Vue.component('l-marker', LMarker)
+Vue.component('l-polyline', LPolyline)
+
+Vue.use(Buefy, {
+  defaultIconPack: 'fas',
+})
 
 
 Vue.config.productionTip = false
