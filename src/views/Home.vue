@@ -38,7 +38,7 @@
                                 :only-map-plate.sync="onlyMapPlate"
                                 :path-plate.sync="pathPlate">
                         </HomeTable>
-                        <p>Click an observation on the map to show plate</p>
+                        <p>Click an observation on the map to show plate {{markerInfo}}</p>
                     </div>
                 </div>
             </div>
@@ -65,6 +65,7 @@
       return {
         search: '',
         zoom: 13,
+        markerInfo: '',
         center: L.latLng(47.413220, -1.219482),
         url: 'http://{s}.tile.osm.org/{z}/{x}/{y}.png',
         attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
@@ -83,7 +84,7 @@
       }
     },
     methods: {
-      reset(){
+      reset() {
         this.onlyMapPlate = null
         this.pathPlate = null
         if (this.heatmapLayer) {
@@ -92,15 +93,18 @@
       },
       showInfo(marker, i) {
         let ap = marker
+        this.markerInfo = ap.time
         this.selectedPlates = this.plates.filter(p => p.observations.filter(o => o.lat === ap.lat && o.lon === ap.lng).length > 0)
         this.showOnlyNear = true
         this.selectedI = i
       },
       getMarkerPointsForPlate(p) {
         return p.observations.map(o =>
-            L.latLng(o.lat, o.lon, {
+            ({
+              lat: o.lat, lng: o.lon,
               title: p.plate_number + ' ' + o.car_model,
               alt: 'none',
+              time: o.time,
             })
         )
       }
@@ -112,8 +116,8 @@
             this.map.removeLayer(this.heatmapLayer)
           }
           this.heatmapLayer = L.heatLayer(this.heatMap.items, {
-            radius: 30,
-            blur: 5,
+            radius: 50,
+            blur: 70,
             maxZoom: 13,
             color: {0: 'transparent', 1: 'red'}
           }).addTo(this.map)
@@ -121,15 +125,15 @@
         deep: true,
       },
       plates() {
-        this.center = this.markers[0]
+        this.center = this.activeMarkers[0]
       },
     },
     computed: {
-      path(){
-        return this.pathPlate ? this.pathPlate.observations.map(p=>[p.lat, p.lon]) : null
+      path() {
+        return this.pathPlate ? this.pathPlate.observations.map(p => [p.lat, p.lon]) : null
       },
       activeMarkers() {
-        return this.onlyMapPlate === null ? this.markers : this.getMarkerPointsForPlate(this.onlyMapPlate)
+        return this.onlyMapPlate === null ? this.allLastMarkers : this.getMarkerPointsForPlate(this.onlyMapPlate)
       },
       visiblePlates() {
         let plates = this.showOnlyNear ? this.selectedPlates : this.plates
@@ -138,8 +142,11 @@
         }
         return plates
       },
-      markers() {
-        return flatMap(this.plates, p => this.getMarkerPointsForPlate(p))
+      allLastMarkers() {
+        return this.plates.map(p => {
+          let a = this.getMarkerPointsForPlate(p)
+          return a[a.length - 1]
+        })
       }
     },
     created() {
