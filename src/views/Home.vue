@@ -13,7 +13,7 @@
                             </div>
                         </div>
                         <div style="height: 80vh; width: 100%">
-                            <l-map :zoom="zoom" :center="center" @ready="mo=>map=mo">
+                            <l-map :zoom="zoom" :center="center" @ready="mo=>map=mo" @click="clickMap">
                                 <l-tile-layer :url="url" :attribution="attribution"></l-tile-layer>
                                 <l-marker v-for="(marker, i) in activeMarkers" :key="i" :lat-lng="marker"
                                           @click="showInfo(marker, i)"></l-marker>
@@ -39,6 +39,29 @@
                                 :path-plate.sync="pathPlate">
                         </HomeTable>
                         <p>Click an observation on the map to show plate {{markerInfo}}</p>
+                        <br/>
+                        <h1 class="subtitle">Traffic flow analysis</h1>
+                        <template v-if="tfa.selectedPosition">
+                            <h5 class="label">
+                                {{tfa.selectedPosition.lat.toFixed(4)}} {{tfa.selectedPosition.lng.toFixed(4)}}
+                            </h5>
+                            <b-field horizontal label="Minutes">
+                                <b-input type="number" placeholder="Mins" v-model="tfa.mins"></b-input>
+                            </b-field>
+                            <b-field horizontal label="Tolerance distance">
+                                <b-input type="number" step="0.001" placeholder="Tol dist"
+                                         v-model="tfa.toleraceDistance"></b-input>
+                            </b-field>
+                            <b-field horizontal label="Tolerance time">
+                                <b-input type="number" placeholder="Tol time" v-model="tfa.toleraceTime"></b-input>
+                            </b-field>
+                            <button class="button is-inverted" @click="drawTrafficFlow">Traffic flow</button>
+                        </template>
+                        <h5 class="label" v-else>Select a point for traffic flow analysis.</h5>
+                    </div>
+                </div>
+                <div class="columns">
+                    <div class="column is-3">
                     </div>
                 </div>
             </div>
@@ -79,11 +102,44 @@
         heatMap: {
           items: [],
           max: 0,
+          maxZoom: 13,
         },
         map: null,
+        tfa: {
+          selectedPosition: null,
+          mins: 30,
+          toleraceDistance: 0.005,
+          toleraceTime: 1,
+        },
       }
     },
     methods: {
+      drawTrafficFlow() {
+        let results = []
+        let minOffset = (this.tfa.mins - this.tfa.toleraceTime) * 60 * 1000
+        let maxOffset = (this.tfa.mins + this.tfa.toleraceTime) * 60 * 1000
+        let p = this.tfa.selectedPosition
+        let d = this.tfa.toleraceDistance
+        this.plates.forEach(plate => {
+          let lastTime = null
+          plate.observations.forEach(observation => {
+            if (p.lat - d <= observation.lat && observation.lat <= p.lat + d && p.lng - d <= observation.lon && observation.lon <= p.lng + d) {
+              lastTime = Date.parse(observation.time)
+            }
+            if (lastTime != null) {
+              let ot = Date.parse(observation.time)
+              if (lastTime + minOffset <= ot && ot <= lastTime + maxOffset)
+                results.push([observation.lat, observation.lon, 1])
+            }
+          })
+        })
+        this.heatMap.items = results
+        this.heatMap.max = 1
+        this.heatMap.maxZoom = 18
+      },
+      clickMap(e) {
+        this.tfa.selectedPosition = e.latlng
+      },
       reset() {
         this.onlyMapPlate = null
         this.pathPlate = null

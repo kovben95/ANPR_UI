@@ -65,6 +65,7 @@
       showHeatMap(plate){
         this.heatMap.items = plate.observations.map(o => [o.lat, o.lon, 1])
         this.heatMap.max = 1
+        this.heatMap.maxZoom = 13
       },
       mapPlate(plate){
         this.$emit('update:onlyMapPlate', plate)
