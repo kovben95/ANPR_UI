@@ -9,6 +9,9 @@
                                 <h2 class="subtitle">Map</h2>
                             </div>
                             <div class="column has-text-right">
+                                <b-switch v-model="hideAllMarkers">Hide all markers</b-switch>
+                            </div>
+                            <div class="column has-text-right">
                                 <b-button type="is-info" @click="reset">Reset map</b-button>
                             </div>
                         </div>
@@ -46,14 +49,14 @@
                                 {{tfa.selectedPosition.lat.toFixed(4)}} {{tfa.selectedPosition.lng.toFixed(4)}}
                             </h5>
                             <b-field horizontal label="Minutes">
-                                <b-input type="number" placeholder="Mins" v-model="tfa.mins"></b-input>
+                                <b-input type="number" placeholder="Mins" v-model.number="tfa.mins"></b-input>
                             </b-field>
                             <b-field horizontal label="Tolerance distance">
                                 <b-input type="number" step="0.001" placeholder="Tol dist"
-                                         v-model="tfa.toleraceDistance"></b-input>
+                                         v-model.number="tfa.toleraceDistance"></b-input>
                             </b-field>
                             <b-field horizontal label="Tolerance time">
-                                <b-input type="number" placeholder="Tol time" v-model="tfa.toleraceTime"></b-input>
+                                <b-input type="number" placeholder="Tol time" v-model.number="tfa.toleraceTime"></b-input>
                             </b-field>
                             <button class="button is-inverted" @click="drawTrafficFlow">Traffic flow</button>
                         </template>
@@ -99,6 +102,7 @@
         showOnlyNear: false,
         selectedI: -1,
         heatmapLayer: null,
+        hideAllMarkers: false,
         heatMap: {
           items: [],
           max: 0,
@@ -108,7 +112,7 @@
         tfa: {
           selectedPosition: null,
           mins: 30,
-          toleraceDistance: 0.005,
+          toleraceDistance: 0.003,
           toleraceTime: 1,
         },
       }
@@ -189,6 +193,9 @@
         return this.pathPlate ? this.pathPlate.observations.map(p => [p.lat, p.lon]) : null
       },
       activeMarkers() {
+        if(this.hideAllMarkers){
+          return []
+        }
         return this.onlyMapPlate === null ? this.allLastMarkers : this.getMarkerPointsForPlate(this.onlyMapPlate)
       },
       visiblePlates() {
