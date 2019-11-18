@@ -10,9 +10,11 @@
                             </div>
                             <div class="column has-text-right">
                                 <b-switch v-model="hideAllMarkers">Hide all markers</b-switch>
+                                <b-switch v-model="showRestrictedAreas">Show restricted areas</b-switch>
                             </div>
                             <div class="column has-text-right">
-                                <b-button type="is-info" @click="reset">Reset map</b-button>
+                                <b-button type="is-info" @click="reset">Reset map</b-button>&nbsp;&nbsp;
+                                <b-button type="is-info" @click="reset">Fetch burglary data</b-button>
                             </div>
                         </div>
                         <div style="height: 80vh; width: 100%">
@@ -25,6 +27,9 @@
                                         :lat-lngs="path"
                                         color="green">
                                 </l-polyline>
+                                <l-polygon v-if="showRestrictedAreas" v-for="area in restrictedAreas"
+                                           :lat-lngs="area.path" fill-color="red" :key="area.id">
+                                </l-polygon>
                             </l-map>
                         </div>
                     </div>
@@ -56,7 +61,8 @@
                                          v-model.number="tfa.toleraceDistance"></b-input>
                             </b-field>
                             <b-field horizontal label="Tolerance time">
-                                <b-input type="number" placeholder="Tol time" v-model.number="tfa.toleraceTime"></b-input>
+                                <b-input type="number" placeholder="Tol time"
+                                         v-model.number="tfa.toleraceTime"></b-input>
                             </b-field>
                             <button class="button is-inverted" @click="drawTrafficFlow">Traffic flow</button>
                         </template>
@@ -103,6 +109,8 @@
         selectedI: -1,
         heatmapLayer: null,
         hideAllMarkers: false,
+        showRestrictedAreas: true,
+        restrictedAreas: [],
         heatMap: {
           items: [],
           max: 0,
@@ -193,7 +201,7 @@
         return this.pathPlate ? this.pathPlate.observations.map(p => [p.lat, p.lon]) : null
       },
       activeMarkers() {
-        if(this.hideAllMarkers){
+        if (this.hideAllMarkers) {
           return []
         }
         return this.onlyMapPlate === null ? this.allLastMarkers : this.getMarkerPointsForPlate(this.onlyMapPlate)
@@ -222,8 +230,13 @@
           .catch(function (error) {
             console.log(error);
           })
-          .finally(function () {
-          });
+      axios.get('/restricted_areas.json')
+          .then((response) => {
+            this.restrictedAreas = response.data
+          })
+          .catch(function (error) {
+            console.log(error);
+          })
     }
   }
 </script>
