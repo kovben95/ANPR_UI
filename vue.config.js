@@ -4,7 +4,7 @@ module.exports = {
     headers: {'Access-Control-Allow-Origin': '*'},
     proxy: {
       '^/api': {
-        target: 'http://localhost:8000/api',
+        target: 'http://localhost:8000/',
         ws: true,
         changeOrigin: true
       },
