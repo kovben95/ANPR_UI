@@ -98,7 +98,7 @@
         search: '',
         zoom: 13,
         markerInfo: '',
-        center: L.latLng(47.413220, -1.219482),
+        center: L.latLng(52.0101, 4.3654),
         url: 'http://{s}.tile.osm.org/{z}/{x}/{y}.png',
         attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
         selectedPlates: [],
@@ -193,7 +193,7 @@
         deep: true,
       },
       plates() {
-        this.center = this.activeMarkers[0]
+        //this.center = this.activeMarkers[0]
       },
     },
     computed: {
