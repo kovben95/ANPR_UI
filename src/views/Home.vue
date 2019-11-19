@@ -221,8 +221,7 @@
       }
     },
     created() {
-      axios.get(window.location.href.indexOf('locahost') === -1 ? 'http://localhost:8000/api/' :
-          'https://whispering-basin-20961.herokuapp.com/api/'
+      axios.get('/api/'
       )
           .then((response) => {
             this.plates = response.data
