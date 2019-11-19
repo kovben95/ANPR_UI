@@ -6,7 +6,7 @@
                     <div class="column is-8-tablet">
                         <div class="columns">
                             <div class="column">
-                                <h2 class="subtitle">Map <span v-if="plates.length > 0">Fetching observations...</span></h2>
+                                <h2 class="subtitle">Map <span v-if="plates.length == 0">Fetching observations...</span></h2>
                             </div>
                             <div class="column has-text-right">
                                 <b-switch v-model="hideAllMarkers">Hide all markers</b-switch>
